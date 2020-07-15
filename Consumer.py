@@ -1,8 +1,8 @@
-import  threading
+from threading import Thread
+import threading
 
-class Consummer(threading.Thread):
-
+class consumer(threading.Thread):
     def run(self):
-        return print(self)
-
+        for i in range(100):
+            print(threading.currentThread().getName())
 

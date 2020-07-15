@@ -1,12 +1,8 @@
 
-from search import CONSUMER
+from Consumer import consumer
 
-if __name__ == "__main__":
-    f1 = CONSUMER.Consummer.run('aaa')
-    f2 = CONSUMER.Consummer.run('bbb')
+site = ['ntis', 'SCIENCEON', 'Scopus']
 
-
-
-
-
+for i in range(len(site)):
+    consumer(name=site[i]).start()         #thread 생성
 
