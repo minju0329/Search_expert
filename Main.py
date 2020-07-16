@@ -1,5 +1,5 @@
 
-from Thread_consumer import Consumer
+from CONSUMER import Consumer
 
 site = ['NTIS']
 

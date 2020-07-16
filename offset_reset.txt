@@ -1,4 +1,4 @@
-[root@localhost kafka]# bin/kafka-consumer-groups.sh --bootstrap-server 203.255.92.48:9092 --group ntis --describe
+kf[root@localhost kafka]# bin/kafka-consumer-groups.sh --bootstrap-server 203.255.92.48:9092 --group ntis --describe
 
 [root@localhost kafka]# bin/kafka-consumer-groups.sh --bootstrap-server 203.255.92.48:9092 --group test --describe
 
