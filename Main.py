@@ -1,8 +1,10 @@
 
-from Consumer import consumer
+from Thread_consumer import Consumer
 
-site = ['ntis', 'SCIENCEON', 'Scopus']
+site = ['NTIS']
 
 for i in range(len(site)):
-    consumer(name=site[i]).start()         #thread 생성
+    Consumer(site[i]).start()    # consumer 객체생성
+
+
 
