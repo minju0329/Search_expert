@@ -68,10 +68,12 @@ def consumer():
                     # logging.warning(f"value={data}")
                     A_id = []
 
-                    Raw_HumanID = data["mngId"].replace('ntis:B551186-B551186>HMO.','')		#책임연구자 ID
+                    Raw_HumanID = data["mngId"].replace('ntis:B551186-B551186>HMO.','').replace('"','')	#책임연구자 ID
                     mng_ID = re.sub('[\"]','', Raw_HumanID)
                     R_Inst = data["ldAgency"]
                     Inst = re.sub('[\"]',"",R_Inst)
+                    R_rsc = re.sub('[ ]', "", data["rsc"])
+                    R_rscID = data["rscId"]
 
                     if len(mng_ID) <=4:
                         _id = search(mng_Name, Inst)
@@ -83,8 +85,7 @@ def consumer():
                     result = {'_id':mng_ID, 'name':mng_Name, 'inst':Inst}
                     _id=check(mng_ID)
                     val=check_inst(mng_Name, mng_ID, Inst)
-                    R_rsc = re.sub('[ ]',"", data["rsc"])
-                    R_rscID = data["rscId"]
+
                     if _id == 0 and val == 0:	# 책임연구자 중복이 없으면
                         Author.insert(result)	#책임 연구자 db넣기
                         A_id.append(mng_ID)
