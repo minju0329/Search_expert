@@ -402,6 +402,7 @@ def consume():
 		logging.warning('consume')
 		for msg in consumer:
 			cnt = 1
+
 			data = json.loads(msg.value)
 			max = len(data)
 			logging.warning(max)
@@ -422,6 +423,8 @@ def consume():
 				else:
 					logging.warning('s3 '+str(raw_progress))
 				cnt += 1
+
+
                 #duplicate
 				r = Rawdata.find_one({'$and':[{'id':paper['id']},{'keyId':key_id}]})
 				if r is not None:
@@ -476,6 +479,7 @@ def consume():
 					object_id = paper['_id']
 					for i in a_id:
 						AuthorPapers.update({'A_ID':i, 'keyId':key_id}, {'$push' :{'papers':{'$each':[object_id]}}},True,False)
+
 					aidLen = len(a_id)
 					if aidLen > 1:
 						for i, val in enumerate(a_id):

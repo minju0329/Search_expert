@@ -36,27 +36,19 @@ def consumer():
         for msg in consumer:
             # print(msg.value)
             data = msg.value
-            # data = json.loads(msg.value)
 
-            # global key_id
             key_id = data['keyId']
-            #print(data)
-            # logging.warning(f"value={data}")
             db_progress, db_state = serchpro(key_id)	#db에 저장되어있는 진행, 상태 받아오기
             raw_progress = data["progress"]*100		#raw data 진행률 받아오기
 
             if(db_progress!=raw_progress)and(raw_progress!=100):
-                # logging.warning('s1 ' + str(raw_progress))
                 print(str(raw_progress))
                 QueryKeyword.update({"_id":key_id},{'$set':{"progress":str(raw_progress)}})
-            #print(re)
             elif (raw_progress==100):
-                # logging.warning('s2 '+ str(raw_progress))
                 print(str(raw_progress))
                 dt = datetime.datetime.now()
                 count = Rawdata.count({"keyId" : key_id})
                 QueryKeyword.update({"_id":key_id},{'$set':{ "progress":0, "state":1, "data" : count, "crawl_time" : dt.strftime("%Y-%m-%d %H:%M:%S")}})
-                # QueryKeyword.update({"_id":key_id},{'$set':{"_id":key_id, "progress":0, "state":1}})
                 calculateExpertFactors(key_id)
             else:
                 logging.warning('s3 '+str(raw_progress))
@@ -64,17 +56,13 @@ def consumer():
             if data.get('id', None) is None:
                 continue
 
-            # logging.warning(data['id'])
-            # logging.warning(data['perfAgent'])
-
             r = Rawdata.find_one({'$and':[{'id':data['id']},{'keyId':data['keyId']}]})
             if r is not None:
-                # logging.warning("dup" + data['id'])
                 continue
+
+
             else:
-
                 mng_Name =re.sub('["]',"", data["mng"]).strip()
-
                 if '03' in data['perfAgent'].split(',')[0] and mng_Name != "null" :
                     Rawdata.insert_one(data)
                     # logging.warning(f"value={data}")
