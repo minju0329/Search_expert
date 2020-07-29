@@ -1,5 +1,5 @@
 
-from test import Consumer
+from Consumer import Consumer
 
 
 def main():
