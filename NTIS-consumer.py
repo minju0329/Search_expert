@@ -12,12 +12,8 @@ import sys, os, time, atexit, logging, random, math, json, re, signal
 import datetime
 
 
-# import daemon
-# from signal import SIGTERM
-
 logging.basicConfig(filename='./crawler2.log',level=logging.WARNING)
-#from daemon import Daemon
-# from py_daemon.py_daemon import Daemon
+
 
 """Generic linux daemon base class for python 3.x."""
 
