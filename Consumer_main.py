@@ -1,5 +1,5 @@
 
-from Consumer import Consumer
+from Thread_Consumer import Consumer
 
 
 def main():
