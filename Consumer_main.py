@@ -1,12 +1,46 @@
+data = {'qryKeyword': ['인공지능챗봇'],
+        'qryTime': '2020812193',
+        'keyId': 7815,
+        'id': '1425141242',
+        'koTitle': '딥러닝 기술을 활용한 병해충 진단 챗봇과 소셜커머스 연동형 스마트폰 AR기반 운영 솔루션',
+        'enTitle': 'None',
+        'mng': '이말례',
+        'mngId': 'ntis:B551186-B551186>HMO.658214116428',
+        'rsc': '이귀재;서강일;김태희;김범석;박미숙;강덕훈;고현웅',
+        'rscId': 'HMO.352113026503;HMO.219255147197;11562878;HMO.874162218872;12560673;11593331;12480883',
+        'cntRscMan': '6',
+        'cntRscWom': '2',
+        'goalAbs': 'None',
+        'absAbs': 'None',
+        'effAbs': 'None',
+        'koKeyword': '딥러닝,병해충,챗봇,소셜커머스,스마트폰 증강현실',
+        'enKeyword': 'Deep learning,pest,Chatbot,Social commerce,Smartphone Augmented Reality',
+        'odAgency': '중소기업기술정보진흥원',
+        'ldAgency': '전북대학교산학협력단',
+        'prdStart': '20200501',
+        'prdEnd': '20201031',
+        'mscL': '정보통신',
+        'mscM': '소프트웨어',
+        'mscS': 'SW솔루션',
+        'perfAgent': {'@code': '03', '#text': '대학'},
+        'region': {'@code': '12', '#text': '전라북도 전주시'},
+        'totalFund': '30000000',
+        'progress': 0.08878504672897196,
+        'loop': 19}
+data2 = {'qryKeyword': ['인공지능챗봇'],
+         'qryTime': '2020812193',
+         'keyId': 7815,
+         'id': '1345321855',
+         'koTitle': '특수목적영어를 위한 인공지능 챗봇의 활용방안 탐색과 시범 컨텐츠 개발',
+         'enTitle': 'Integration and development of AI Chatbot for English for Specific Purposes',
+         'mng': '양혜진', 'mngId': None, 'rsc': None, 'rscId': None,
+         'cntRscMan': '0', 'cntRscWom': '1', 'goalAbs': 'None', 'absAbs': 'None',
+         'effAbs': 'None', 'koKeyword': '특수목적영어를 위한 인공지능 챗봇의 활용방안 탐색과 시범 컨텐츠 개발',
+         'enKeyword': 'None', 'odAgency': '한국연구재단', 'ldAgency': '중앙대학교', 'prdStart': '20200701',
+         'prdEnd': '20210630', 'mscL': '인문사회기초연구사업', 'mscM': '학문후속세대양성',
+         'mscS': '학문후속세대양성(박사후국내연수)',
+         'perfAgent': {'@code': '03', '#text': '대학'},
+         'region': {'@code': '01', '#text': '서울특별시'},
+         'totalFund': '34000000', 'progress': 0.09813084112149532, 'loop': 21}
 
-from Thread_Consumer import Consumer
-
-
-def main():
-    site = ['NTIS', 'SCIENCEON']
-
-    for i in range(len(site)):
-        Consumer(site[i]).start()    # consumer 객체생성
-
-if __name__ == "__main__":
-    main()
+print(data2['perfAgent']['@code']=='03')

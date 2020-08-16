@@ -65,9 +65,7 @@ Author = db.Author
 AuthorRelation = db.AuthorRelation
 ExpertFactor = db.ExpertFactor
 
-db2 = client.PUBLIC
-KCI = db2.KCI
-SCI = db2.SCI
+
 
 
 
@@ -402,7 +400,6 @@ def consume():
 		logging.warning('consume')
 		for msg in consumer:
 			cnt = 1
-
 			data = json.loads(msg.value)
 			max = len(data)
 			logging.warning(max)
