@@ -7,6 +7,8 @@ import re
 
 from selenium.webdriver.support.wait import WebDriverWait
 
+import threading
+
 class SCOPUS:
     def __init__(self,f_Queary, Queary):
         self.chrome_options = webdriver.ChromeOptions()
@@ -30,7 +32,7 @@ class SCOPUS:
     def action(self, flag, _param, flag2, _param2):
         if self.popup == False:
             try:
-                time.sleep(3)
+                time.sleep(1)
                 close = self.driver.find_element_by_class_name("_pendo-close-guide").click()
                 self.popup = True
                 print("팝업창 닫기")
@@ -55,8 +57,8 @@ class SCOPUS:
             temp = WebDriverWait(self.driver, 30).until( lambda x : x.find_element_by_xpath(_param))
 
         if flag2 == 1:
-            temp.click()
             time.sleep(self.sleepTime)
+            temp.click()
         elif flag2 == 2:
             temp.send_keys(_param2)
         elif flag2 == 3:
@@ -70,6 +72,48 @@ class SCOPUS:
                 print('element is active')
                 break
             time.sleep(self.sleepTime)
+
+    def getDownLoadedFileName(self, waitTime):
+        self.driver.execute_script("window.open()")
+        # switch to new tab
+        self.driver.switch_to.window(self.driver.window_handles[-1])
+        # navigate to chrome downloads
+        self.driver.get('chrome://downloads')
+        # define the endTime
+        endTime = time.time() + waitTime
+        print("run very well")
+        fileName = ""
+        while True:
+            try:
+
+                # get downloaded percentage
+                downloadPercentage = self.driver.execute_script(
+                    "return document.querySelector('downloads-manager').shadowRoot.querySelector('#downloadsList downloads-item').shadowRoot.querySelector('#progress').value")
+                # check if downloadPercentage is 100 (otherwise the script will keep waiting)
+                print("downloading", downloadPercentage)
+                if downloadPercentage == 100:
+                    # return the file name once the download is completed
+                    fileName = self.driver.execute_script(
+                        "return document.querySelector('downloads-manager').shadowRoot.querySelector('#downloadsList downloads-item').shadowRoot.querySelector('div#content  #file-link').text")
+                    break
+            except:
+                pass
+            time.sleep(1)
+            if time.time() > endTime:
+                break
+
+        if fileName != "" :
+            print(fileName)
+
+    def check_checkbox(self, _id):
+
+        self.action(2, '#bibliographicalInformationCheckboxes > span > label', 1, None)
+        self.action(2, '#abstractInformationCheckboxes > span > label', 1, None)
+        self.action(2, '#fundInformationCheckboxes > span > label', 1, None)
+        self.action(2, '#otherInformationCheckboxes > span > label', 1, None)
+        self.action(2, '#exportTrigger', 1, None)
+        threading.Thread(target=self.getDownLoadedFileName, args=(100,)).run()
+        print("다운로드")
 
     def open_site(self):
         URL = "https://www.scopus.com/search/form.uri?display=basic&zone=header&origin="
@@ -132,30 +176,17 @@ class SCOPUS:
         new_query = ' AND (' + string + ' )'
         return new_query
     def download(self):
-        time.sleep(5)
-        # self.driver.find_element_by_css_selector('#selectAllCheck').click()
-        self.driver.find_element_by_css_selector('#selectAllCheck').click()  # All 체크
-        time.sleep(1)
-        self.driver.find_element_by_xpath('//*[@id="export_results"]/span').click()  # export클릭
-        time.sleep(1)
-        self.driver.find_element_by_xpath('//*[@id="exportList"]/li[4]/label').click()  # csv 체크
-        time.sleep(1)
-        self.driver.find_element_by_css_selector(
-            '#bibliographicalInformationCheckboxes > span > label').click()  # Bibliographical information 체크
-        time.sleep(1)
-        self.driver.find_element_by_css_selector(
-            '#abstractInformationCheckboxes > span > label').click()  # Abstract & keywords 체크
-        time.sleep(1)
-        self.driver.find_element_by_css_selector('#fundInformationCheckboxes > span > label').click()  # Funding details 체크
-        time.sleep(1)
-        self.driver.find_element_by_css_selector(
-            '#otherInformationCheckboxes > span > label').click()  # Other information 체크
-        time.sleep(1)
-        self.driver.find_element_by_css_selector('#exportTrigger').click()
+        self.action(2, '#selectAllCheck', 1, None)
+        self.action(4, '//*[@id="export_results"]/span', 1, None)
+        self.action(4, '//*[@id="exportList"]/li[4]/label', 1, None)
+        self.check_checkbox('#selectedBibliographicalInformationItems-Export1')
+        # self.action(2, '#bibliographicalInformationCheckboxes > span > label', 1, None)
+        # self.action(2, '#abstractInformationCheckboxes > span > label', 1, None)
+        # self.action(2, '#fundInformationCheckboxes > span > label', 1, None)
+        # self.action(2, '#otherInformationCheckboxes > span > label', 1, None)
+        # self.action(2, '#exportTrigger', 1, None)
 
-        return 0
     def re_search(self,re_query):
-        print(re_query)
         self.action(1, 'editAuthSearch', 1, None)
         try:
             self.action(1, 'clearLink', 1, None)
@@ -163,6 +194,7 @@ class SCOPUS:
             self.action(2, "advSearchLink", 1, None)
         self.action(1, "searchfield", 2, re_query)
         self.action(3, "secondaryLink", 1, None)
+        print(re_query)
         self.action(1, "advSearch", 1, None)
         # self.total_count()
 
@@ -369,81 +401,91 @@ class SCOPUS:
                         exclude_Keyword = exclude_Keyword[end_idx:]
                         break
 
-    def over2000_years(self, start):
+    def over2000_years(self, start, YEAR, _temp):
+        if YEAR == True:
+            self.over_2000_papers = [[_temp,self.papers_per_year[_temp]]]
+
         for i in self.over_2000_papers:
             self.over_2000_papers_country = []
             temp = self.query
             query_year = temp + ' '+ ' AND ( LIMIT-TO ( PUBYEAR, '+i[0]+') ) '
-            self.re_search(query_year)      # 2000개 이상의 연도 재검색
-            if i[1]<=2000:
-                print("프로그램 종료")
-                return 0
-            requery, open_Access, other = self.Access_type(query_year, i[0])              # Access type 논문 수 파악
+            retryCount = 3
+            while retryCount > 0 :
+                try :
+                    self.re_search(query_year)      # 2000개 이상의 연도 재검색
+                    if i[1]<=2000:
+                        print("프로그램 종료")
+                        return 0
+                    requery, open_Access, other = self.Access_type(query_year, i[0])              # Access type 논문 수 파악
 
-            if type == True:
-                pass
-            elif (open_Access != 0 and other != 0):
-                query_access = query_year + 'AND ( LIMIT-TO ( openaccess,1))'
-                self.re_search(query_access)
-                self.search_country(query_access, open_Access)           # country를 exclude로 재검색
-                self.country_flag = True
-                for idx in range(len(self.over_2000_papers_country)):
-                    print('2.self.over_2000_papers_country:',self.over_2000_papers_country)
-                    query_country = query_access + ' '+ ' AND ( LIMIT-TO ( AFFILCOUNTRY, ' + self.over_2000_papers_country[idx][0] + ') ) '
-                    self.re_search(query_country)
-                    self.search_keyword(query_country, self.over_2000_papers_country[idx][1])
-                    self.keyword_flag = True
+                    if type == True:
+                        pass
+                    elif (open_Access != 0 and other != 0):
+                        query_access = query_year + 'AND ( LIMIT-TO ( openaccess,1))'
+                        self.re_search(query_access)
+                        self.search_country(query_access, open_Access)           # country를 exclude로 재검색
+                        self.country_flag = True
+                        for idx in range(len(self.over_2000_papers_country)):
+                            print('2.self.over_2000_papers_country:',self.over_2000_papers_country)
+                            query_country = query_access + ' '+ ' AND ( LIMIT-TO ( AFFILCOUNTRY, ' + self.over_2000_papers_country[idx][0] + ') ) '
+                            self.re_search(query_country)
+                            self.search_keyword(query_country, self.over_2000_papers_country[idx][1])
+                            self.keyword_flag = True
 
-                self.over_2000_papers_country = []
-                query_access = query_year + 'AND ( LIMIT-TO ( openaccess,0))'
-                self.re_search(query_access)
-                self.search_country(query_access, other)           # country를 exclude로 재검색
-                self.country_flag = True
-                for idx in range(len(self.over_2000_papers_country)):
-                    print('3.self.over_2000_papers_country:',self.over_2000_papers_country)
-                    # temp = self.query
-                    query_country = query_access + ' '+ ' AND ( LIMIT-TO ( AFFILCOUNTRY, ' + self.over_2000_papers_country[idx][0] + ') ) '
-                    self.re_search(query_country)
-                    self.search_keyword(query_country, self.over_2000_papers_country[idx][1])
-                    self.keyword_flag = True
+                        self.over_2000_papers_country = []
+                        query_access = query_year + 'AND ( LIMIT-TO ( openaccess,0))'
+                        self.re_search(query_access)
+                        self.search_country(query_access, other)           # country를 exclude로 재검색
+                        self.country_flag = True
+                        for idx in range(len(self.over_2000_papers_country)):
+                            print('3.self.over_2000_papers_country:',self.over_2000_papers_country)
+                            # temp = self.query
+                            query_country = query_access + ' '+ ' AND ( LIMIT-TO ( AFFILCOUNTRY, ' + self.over_2000_papers_country[idx][0] + ') ) '
+                            self.re_search(query_country)
+                            self.search_keyword(query_country, self.over_2000_papers_country[idx][1])
+                            self.keyword_flag = True
 
-            elif other==0 and requery != True:
-                # open_Access 다운
-                # self.re_search(requery)
-                query_access = query_year + 'AND ( LIMIT-TO ( openaccess,1))'
-                self.re_search(query_access)
-                self.search_country(query_access, open_Access)           # country를 exclude로 재검색
-                self.country_flag = True
-                for idx in range(len(self.over_2000_papers_country)):
-                    print('2.self.over_2000_papers_country:',self.over_2000_papers_country)
-                    query_country = query_access + ' '+ ' AND ( LIMIT-TO ( AFFILCOUNTRY, ' + self.over_2000_papers_country[idx][0] + ') ) '
-                    self.re_search(query_country)
-                    self.search_keyword(query_country, self.over_2000_papers_country[idx][1])
-                    self.keyword_flag = True
+                    elif other==0 and requery != True:
+                        # open_Access 다운
+                        # self.re_search(requery)
+                        query_access = query_year + 'AND ( LIMIT-TO ( openaccess,1))'
+                        self.re_search(query_access)
+                        self.search_country(query_access, open_Access)           # country를 exclude로 재검색
+                        self.country_flag = True
+                        for idx in range(len(self.over_2000_papers_country)):
+                            print('2.self.over_2000_papers_country:',self.over_2000_papers_country)
+                            query_country = query_access + ' '+ ' AND ( LIMIT-TO ( AFFILCOUNTRY, ' + self.over_2000_papers_country[idx][0] + ') ) '
+                            self.re_search(query_country)
+                            self.search_keyword(query_country, self.over_2000_papers_country[idx][1])
+                            self.keyword_flag = True
 
-            elif open_Access==0 and requery != True:
-                # other 다운
-                # self.re_search(requery)
-                query_access = query_year + 'AND ( LIMIT-TO ( openaccess,0))'
-                self.re_search(query_access)
-                self.search_country(query_access, other)           # country를 exclude로 재검색
-                self.country_flag = True
-                for idx in range(len(self.over_2000_papers_country)):
-                    print('2.self.over_2000_papers_country:',self.over_2000_papers_country)
-                    query_country = query_access + ' '+ ' AND ( LIMIT-TO ( AFFILCOUNTRY, ' + self.over_2000_papers_country[idx][0] + ') ) '
-                    self.re_search(query_country)
-                    self.search_keyword(query_country, self.over_2000_papers_country[idx][1])
-                    self.keyword_flag = True
+                    elif open_Access==0 and requery != True:
+                        # other 다운
+                        # self.re_search(requery)
+                        query_access = query_year + 'AND ( LIMIT-TO ( openaccess,0))'
+                        self.re_search(query_access)
+                        self.search_country(query_access, other)           # country를 exclude로 재검색
+                        self.country_flag = True
+                        for idx in range(len(self.over_2000_papers_country)):
+                            print('2.self.over_2000_papers_country:',self.over_2000_papers_country)
+                            query_country = query_access + ' '+ ' AND ( LIMIT-TO ( AFFILCOUNTRY, ' + self.over_2000_papers_country[idx][0] + ') ) '
+                            self.re_search(query_country)
+                            self.search_keyword(query_country, self.over_2000_papers_country[idx][1])
+                            self.keyword_flag = True
 
-            min = (time.time() - start) // 60
-            sec = (time.time() - start) % 60
-            print("time: ", min, '분', sec, '초')
-            print(i[0]+'년 완료')
+                    min = (time.time() - start) // 60
+                    sec = (time.time() - start) % 60
+                    print("time: ", min, '분', sec, '초')
+                    print(i[0]+'년 완료')
+                    break
+                except Exception as e :
+                    print(e)
+                    retryCount -= 1
 
         return 0
 
 def create_queary():
-    keywords = {'and': ["fuel", "cell"], 'or': [], 'not': [], 'year': [2010]}
+    keywords = {'and': ["fuel", "cell"], 'or': [], 'not': [], 'year': [2018]}
 
     s_queary = ''
     and_not = ''
@@ -465,6 +507,7 @@ def create_queary():
 
 def main():
     start = time.time()
+    YEAR = True
     f_Queary, Queary = create_queary()
     site = SCOPUS(f_Queary, Queary)
     site.open_site()
@@ -472,10 +515,13 @@ def main():
     if site.total_amount <= 2000:
         site.download()
         print("프로그램 종료")
+        time.sleep(100)
         return 0
     site.years()            # 년도별 논문 수 딕셔너리
-    site.under2000_years()
-    site.over2000_years(start)
+    if YEAR == False:
+        site.under2000_years()
+    site.over2000_years(start, YEAR, "2020")
+    time.sleep(100)
     site.driver.quit()
 
 if __name__ == "__main__":
